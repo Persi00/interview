@@ -143,7 +143,7 @@ def getUsedMachines(product, resultAmount, graph : list, vertexRecipe : list, ve
     return machines
 
 def getNeededMachines(product, resultAmount, mode = "normal"):
-    recipes = readJsonFile(f"{mode}.json")
+    recipes = readJsonFile(f"data/{mode}.json")
 
     whichRecipeToGet = mapItemsToRecipes(recipes)
 

@@ -51,6 +51,6 @@ for i in range(len(tokens)):
 textJson = f'{"".join(tokens)}'.replace(',}', '}').replace(',]', ']')
 
 # dump data to json file
-jsonFile = open("recipe.json", "w+")
+jsonFile = open("data/recipe.json", "w+")
 jsonFile.writelines(textJson)
 jsonFile.close()

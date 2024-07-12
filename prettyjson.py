@@ -73,10 +73,10 @@ def dumpJsonFile(path, jsonData):
     jsonFile.close()
 
 def prettyJson(mode):
-    jsonData = readJsonFile("recipe.json")
-    machines = readJsonFile("machines.json")
+    jsonData = readJsonFile("data/recipe.json")
+    machines = readJsonFile("data/machines.json")
     recipes = extractRecipes(jsonData, machines, mode)
-    dumpJsonFile(f"{mode}.json", recipes)
+    dumpJsonFile(f"data/{mode}.json", recipes)
 
 mode = "normal"
 # mode = "expensive"
