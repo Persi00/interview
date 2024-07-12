@@ -1,10 +1,34 @@
 {
-    "crafting": "Assembling machine 3",
-    "crafting-with-fluid": "Assembling machine 3",
-    "advanced-crafting": "Assembling machine 3",
-    "smelting": "Electric furnace",
-    "oil-processing": "Oil refinery",
-    "chemistry": "Chemical plant",
-    "centrifuging": "Centrifuge",
-    "rocket-building": "Rocket silo"
+    "crafting": {
+        "name": "Assembling machine 3",
+        "speed": 1.25
+    },
+    "crafting-with-fluid": {
+        "name": "Assembling machine 3",
+        "speed": 1.25
+    },
+    "advanced-crafting": {
+        "name": "Assembling machine 3",
+        "speed": 1.25
+    },
+    "smelting": {
+        "name": "Electric furnace",
+        "speed": 2
+    },
+    "oil-processing": {
+        "name": "Oil refinery",
+        "speed": 1
+    },
+    "chemistry": {
+        "name": "Chemical plant",
+        "speed": 1
+    },
+    "centrifuging": {
+        "name": "Certifuge",
+        "speed": 1
+    },
+    "rocket-building": {
+        "name": "Rocket silo",
+        "speed": 1
+    }
 }

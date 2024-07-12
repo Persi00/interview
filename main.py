@@ -1,10 +1,7 @@
-import json
-import collections.abc
-import math
-
+import json, math
 
 product = "plastic-bar"
-resultAmount = 1
+amount = 1
 mode = "normal" 
 # mode = "expensive"
 
@@ -13,65 +10,6 @@ def readJsonFile(path):
     jsonData = json.load(jsonFile)
     jsonFile.close()
     return jsonData
-
-def formatIngredients(ingredients : list) -> list:
-    formattedIngredients = []
-    for ingred in ingredients:
-        if isinstance(ingred, collections.abc.Sequence):
-            formattedIngredients.append({"name": ingred[0], "amount": ingred[1]})
-        else:
-            formattedIngredients.append({"name": ingred["name"], "amount": ingred["amount"]})
-    return formattedIngredients
-
-def extractRecipes(recipesJson : list, machines: dict, mode : str = "normal") -> dict:
-    recipes = {}
-
-    for recipeJson in recipesJson:
-        name = recipeJson["name"]
-        recipes[name] = {}
-
-        category = "crafting"
-        if "category" in recipeJson:
-            category = recipeJson["category"]
-
-        recipes[name]["machine"] = machines[category]
-
-        recipe = {}
-        if mode in recipeJson:
-            recipe = recipeJson[mode]
-        else:
-            recipe = recipeJson
-
-        recipes[name]["ingredients"] = formatIngredients(recipe["ingredients"])
-
-        recipes[name]["duration"] = 0.5
-        if "energy_required" in recipe:
-            recipes[name]["duration"] = recipe["energy_required"]
-                
-        if "result" in recipe:
-            result = recipe["result"]
-            amount = 1
-
-            if "result_count" in recipe:
-                amount = recipe["result_count"]
-
-            recipes[name]["results"] = [{"name": result, "amount": amount}]
-
-        elif "results" in recipe:
-            recipes[name]["results"] = []
-            for resultobj in recipe["results"]:
-                result = ""
-                amount = 0
-                if isinstance(resultobj, collections.abc.Sequence):
-                    result = resultobj[0]
-                    amount = resultobj[1]
-                else:
-                    result = resultobj["name"]
-                    amount = resultobj["amount"]
-
-                recipes[name]["results"].append({"name": result, "amount": amount})
-
-    return recipes
 
 def mapItemsToRecipes(recipes : dict) -> dict:
     whichRecipeToGet = {}
@@ -130,7 +68,7 @@ def getVerticiesInTopologicalOrder(graph : list) -> list:
 
     return verticiesInTopologicalOrder
 
-def getUsedResourcesAndMachines(product, resultAmount, graph : list, vertexRecipe : list, verticiesInTopologicalOrder : list, recipes : dict) -> dict:
+def getUsedMachines(product, resultAmount, graph : list, vertexRecipe : list, verticiesInTopologicalOrder : list, recipes : dict) -> dict:
     for result in recipes[vertexRecipe[0][0]]["results"]:
         if result["name"] == product:
             vertexRecipe[0][1] = math.ceil(resultAmount / result["amount"])
@@ -172,7 +110,7 @@ def getUsedResourcesAndMachines(product, resultAmount, graph : list, vertexRecip
             if not "Electric mining drill" in machines:
                 machines["Electric mining drill"] = 0
                 
-            machines["Electric mining drill"] += resources[resourceName] * 4
+            machines["Electric mining drill"] += math.ceil(resources[resourceName] / 0.25)
 
         elif resourceName == "water":
             if not "Offshore pump" in machines:
@@ -184,38 +122,28 @@ def getUsedResourcesAndMachines(product, resultAmount, graph : list, vertexRecip
             if not "Pumpjack" in machines:
                 machines["Pumpjack"] = 0
             
-            machines["Pumpjack"] += math.ceil(resources[resourceName] / 2)
+            machines["Pumpjack"] += math.ceil(resources[resourceName] / 10)
 
         else:
             if not "Electric mining drill" in machines:
                 machines["Electric mining drill"] = 0
                 
-            machines["Electric mining drill"] += resources[resourceName] * 2
+            machines["Electric mining drill"] += math.ceil(resources[resourceName] / 0.5)
 
     for recipe in vertexRecipe:
         recipeName, recipeUsesCount = recipe[0:2]
-        machineName = recipes[recipeName]["machine"]
+        machineName = recipes[recipeName]["machine"]["name"]
+        machineSpeed = recipes[recipeName]["machine"]["speed"]
         duration = recipes[recipeName]["duration"]
-
-        machinesCount = recipeUsesCount * duration
-
-        if machineName == "Assembling machine 3":
-            machinesCount /= 1.25
-
-        elif machineName == "Electric furnace":
-            machinesCount /= 2
 
         if not machineName in machines:
             machines[machineName] = 0
-        machines[machineName] += math.ceil(machinesCount)
+        machines[machineName] += math.ceil(recipeUsesCount * duration / machineSpeed)
         
-    return resources, machines
+    return machines
 
-def getNeededResourcesAndMachines(product, resultAmount, mode = "normal"):
-    recipesJson = readJsonFile("recipe.json")
-    machinesJson = readJsonFile("machines.json")
-
-    recipes = extractRecipes(recipesJson, machinesJson, mode)
+def getNeededMachines(product, resultAmount, mode = "normal"):
+    recipes = readJsonFile(f"{mode}.json")
 
     whichRecipeToGet = mapItemsToRecipes(recipes)
 
@@ -223,15 +151,10 @@ def getNeededResourcesAndMachines(product, resultAmount, mode = "normal"):
 
     verticiesInTopologicalOrder = getVerticiesInTopologicalOrder(graph)
 
-    return getUsedResourcesAndMachines(product, resultAmount, graph, vertexRecipe, verticiesInTopologicalOrder, recipes)
+    return getUsedMachines(product, resultAmount, graph, vertexRecipe, verticiesInTopologicalOrder, recipes)
 
+machines = getNeededMachines(product, amount, mode)
 
-resources, machines = getNeededResourcesAndMachines(product, resultAmount, mode)
-
-print("Resources: ")
-for key in resources:
-    print(f"{key}: {resources[key]} units")
-
-print("\nMachines: ")
+print("Machines: ")
 for key in machines:
-    print(f"{key}: {machines[key]} units")
+    print(f"{key}: {machines[key]}")
