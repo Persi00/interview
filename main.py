@@ -1,10 +1,5 @@
 import json, math
 
-product = "plastic-bar"
-amount = 1
-mode = "normal" 
-# mode = "expensive"
-
 def readJsonFile(path):
     jsonFile = open(path, "r")
     jsonData = json.load(jsonFile)
@@ -153,8 +148,13 @@ def getNeededMachines(product, resultAmount, mode = "normal"):
 
     return getUsedMachines(product, resultAmount, graph, vertexRecipe, verticiesInTopologicalOrder, recipes)
 
-machines = getNeededMachines(product, amount, mode)
+if __name__ == "__main__":
+    product = "iron-plate"
+    amount = 1
+    mode = "normal" 
+    # mode = "expensive"
+    machines = getNeededMachines(product, amount, mode)
 
-print("Machines: ")
-for key in machines:
-    print(f"{key}: {machines[key]}")
+    print("Machines: ")
+    for key in machines:
+        print(f"{key}: {machines[key]}")
