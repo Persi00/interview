@@ -7,42 +7,44 @@ def readJsonFile(path):
     return jsonData
 
 def mapItemsToRecipes(recipes : dict) -> dict:
-    whichRecipeToGet = {}
-    for name in recipes:
-        for result in recipes[name]["results"]:
-            if result["name"] in whichRecipeToGet: 
-                whichRecipeToGet[result["name"]].append(name)
-            else:
-                whichRecipeToGet[result["name"]] = [name]
+    whichRecipeToGet : dict = {}
+    for recipeName in recipes:
+        for result in recipes[recipeName]["results"]:
+            if not result["name"] in whichRecipeToGet:
+                whichRecipeToGet[result["name"]] = []
+            
+            whichRecipeToGet[result["name"]].append(recipeName)
+                
     return whichRecipeToGet
 
 def generateGraphOfRecipes(product : str, recipes : dict, whichRecipeToGet : dict) -> tuple:
-    graph = [[]]
-    addedRecipes = {}
-    addedRecipes[whichRecipeToGet[product][0]] = 0
-    vertexRecipe = [ [whichRecipeToGet[product][0], 0, []] ]
+    graph : list = [[]]
+    usedRecipes = {}
+    usedRecipes[ whichRecipeToGet[product][0] ] = 0
+    vertexRecipes = [ {"name": whichRecipeToGet[product][0], "usesCount": 0, "resultsUsedAmount": []} ]
     dfsStack = [0]
-    while len(dfsStack):
-        v = dfsStack.pop()
-        ingredients = recipes[vertexRecipe[v][0]]["ingredients"]
-        for ingred in ingredients:
-            name = ingred["name"]
 
-            if name in whichRecipeToGet:
-                recipeName = whichRecipeToGet[name][0]
+    while len(dfsStack) > 0:
+        v = dfsStack.pop()
+        ingredients = recipes[vertexRecipes[v]["name"]]["ingredients"]
+        for ingred in ingredients:
+            ingredName = ingred["name"]
+
+            if ingredName in whichRecipeToGet:
+                recipeName = whichRecipeToGet[ingredName][0]
                 u = 0
-                if not recipeName in addedRecipes:
-                    u = len(addedRecipes)
-                    addedRecipes[recipeName] = u
-                    vertexRecipe.append([recipeName, 0, [0] * len(recipes[recipeName]["results"])])
+                if not recipeName in usedRecipes:
+                    u = len(usedRecipes)
+                    usedRecipes[recipeName] = u
+                    vertexRecipes.append({"name": recipeName, "usesCount": 0, "resultsUsedAmount": [0] * len(recipes[recipeName]["results"])})
                     graph.append([])
                 else:
-                    u = addedRecipes[recipeName]
+                    u = usedRecipes[recipeName]
 
                 graph[v].append(u)
                 dfsStack.append(u)
 
-    return (graph, vertexRecipe)
+    return (graph, vertexRecipes)
 
      
 def TopologicalSort(v : int, graph : list, visited : list, verticiesInTopologicalOrder : list) -> None:
@@ -56,37 +58,43 @@ def getVerticiesInTopologicalOrder(graph : list) -> list:
     visited = [False] * len(graph)
     visited[0] = True
 
-    verticiesInTopologicalOrder = []
+    verticiesInTopologicalOrder : list = []
     TopologicalSort(0, graph, visited, verticiesInTopologicalOrder)
 
     verticiesInTopologicalOrder.reverse()
 
     return verticiesInTopologicalOrder
 
-def getUsedMachines(product, resultAmount, graph : list, vertexRecipe : list, verticiesInTopologicalOrder : list, recipes : dict) -> dict:
-    for result in recipes[vertexRecipe[0][0]]["results"]:
+def getUsedMachines(product : str, resultAmount : int, graph : list, vertexRecipes : list, verticiesInTopologicalOrder : list, recipes : dict, extractors : dict) -> dict:
+    for result in recipes[vertexRecipes[0]["name"]]["results"]:
         if result["name"] == product:
-            vertexRecipe[0][1] = math.ceil(resultAmount / result["amount"])
+            vertexRecipes[0]["usesCount"] = math.ceil(resultAmount / result["amount"])
 
     resources = {}
     for v in verticiesInTopologicalOrder:
-        recipeName, recipeUsesCount = vertexRecipe[v][0:2]
+        recipeName = vertexRecipes[v]["name"]
+        recipeUsesCount = vertexRecipes[v]["usesCount"]
+
         for ingred in recipes[recipeName]["ingredients"]:
-            name = ingred["name"]
-            amount = ingred["amount"]
+            ingredName = ingred["name"]
+            ingredAmount = ingred["amount"]
 
             breakLoop = False
             for u in graph[v]:
-                ingredRecipeName, ingredRecipeUsesCount, usedOutput = vertexRecipe[u]
+                ingredRecipeName = vertexRecipes[u]["name"]
+                ingredRecipeUsesCount = vertexRecipes[u]["usesCount"]
+                usedOutput = vertexRecipes[u]["resultsUsedAmount"]
+
+                recipes[ingredRecipeName]["results"]
                 
-                for i, result in zip(range(len(recipes[ingredRecipeName]["results"])), recipes[ingredRecipeName]["results"]):
+                for i, result in enumerate(recipes[ingredRecipeName]["results"]):
                     resultName = result["name"]
                     producedAmount = result["amount"]
                         
-                    if resultName == name:
-                        recipeCycles = math.ceil(max(0, (amount * recipeUsesCount - (producedAmount * ingredRecipeUsesCount - usedOutput[i])) / producedAmount))
-                        vertexRecipe[u][1] += recipeCycles
-                        vertexRecipe[u][2][i] += amount * recipeUsesCount
+                    if resultName == ingredName:
+                        ingredRecipeCycles = math.ceil(max(0, (ingredAmount * recipeUsesCount - (producedAmount * ingredRecipeUsesCount - usedOutput[i])) / producedAmount))
+                        vertexRecipes[u]["usesCount"] += ingredRecipeCycles
+                        vertexRecipes[u]["resultsUsedAmount"][i] += ingredAmount * recipeUsesCount
 
                         breakLoop = True
                         break
@@ -95,38 +103,22 @@ def getUsedMachines(product, resultAmount, graph : list, vertexRecipe : list, ve
                     break
 
             if not breakLoop:
-                if not name in resources:
-                    resources[name] = 0
-                resources[name] += amount * recipeUsesCount
+                if not ingredName in resources:
+                    resources[ingredName] = 0
+                resources[ingredName] += ingredAmount * recipeUsesCount
 
     machines = {}
     for resourceName in resources:
-        if resourceName == "uranium-ore":
-            if not "Electric mining drill" in machines:
-                machines["Electric mining drill"] = 0
-                
-            machines["Electric mining drill"] += math.ceil(resources[resourceName] / 0.25)
+        extractorName = extractors[resourceName]["name"]
+        amoutPerSecond = extractors[resourceName]["amount"]
+        if not extractorName in machines:
+            machines[extractorName] = 0
 
-        elif resourceName == "water":
-            if not "Offshore pump" in machines:
-                machines["Offshore pump"] = 0
-            
-            machines["Offshore pump"] += math.ceil(resources[resourceName] / 1200)
+        machines[extractorName] += math.ceil(resources[resourceName] / amoutPerSecond)
 
-        elif resourceName == "crude-oil":
-            if not "Pumpjack" in machines:
-                machines["Pumpjack"] = 0
-            
-            machines["Pumpjack"] += math.ceil(resources[resourceName] / 10)
-
-        else:
-            if not "Electric mining drill" in machines:
-                machines["Electric mining drill"] = 0
-                
-            machines["Electric mining drill"] += math.ceil(resources[resourceName] / 0.5)
-
-    for recipe in vertexRecipe:
-        recipeName, recipeUsesCount = recipe[0:2]
+    for recipe in vertexRecipes:
+        recipeName = recipe["name"]
+        recipeUsesCount = recipe["usesCount"]
         machineName = recipes[recipeName]["machine"]["name"]
         machineSpeed = recipes[recipeName]["machine"]["speed"]
         duration = recipes[recipeName]["duration"]
@@ -139,17 +131,18 @@ def getUsedMachines(product, resultAmount, graph : list, vertexRecipe : list, ve
 
 def getNeededMachines(product, resultAmount, mode = "normal"):
     recipes = readJsonFile(f"data/{mode}.json")
+    extractors = readJsonFile("data/extractors.json")
 
     whichRecipeToGet = mapItemsToRecipes(recipes)
 
-    graph, vertexRecipe = generateGraphOfRecipes(product, recipes, whichRecipeToGet)
+    graph, vertexRecipes = generateGraphOfRecipes(product, recipes, whichRecipeToGet)
 
     verticiesInTopologicalOrder = getVerticiesInTopologicalOrder(graph)
 
-    return getUsedMachines(product, resultAmount, graph, vertexRecipe, verticiesInTopologicalOrder, recipes)
+    return getUsedMachines(product, resultAmount, graph, vertexRecipes, verticiesInTopologicalOrder, recipes, extractors)
 
 if __name__ == "__main__":
-    product = "iron-plate"
+    product = "plastic-bar"
     amount = 1
     mode = "normal" 
     # mode = "expensive"

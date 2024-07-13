@@ -17,7 +17,7 @@ def formatIngredients(ingredients : list) -> list:
     return formattedIngredients
 
 def extractRecipes(recipesJson : list, machines: dict, mode : str = "normal") -> dict:
-    recipes = {}
+    recipes : dict = {}
 
     for recipeJson in recipesJson:
         name = recipeJson["name"]

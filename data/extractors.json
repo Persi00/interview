@@ -1,0 +1,26 @@
+{
+    "uranium-ore": {
+        "name": "Electric mining drill",
+        "amount": 0.25
+    }, 
+    "iron-ore": {
+        "name": "Electric mining drill",
+        "amount": 0.5
+    },
+    "copper-ore": {
+        "name": "Electric mining drill",
+        "amount": 0.5
+    },
+    "coal": {
+        "name": "Electric mining drill",
+        "amount": 0.5
+    },
+    "water": {
+        "name": "Offshore pump",
+        "amount": 1200
+    },
+    "crude-oil": {
+        "name": "Pumpjack",
+        "amount": 10
+    }
+}
