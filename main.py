@@ -142,7 +142,7 @@ def getNeededMachines(product, resultAmount, mode = "normal"):
     return getUsedMachines(product, resultAmount, graph, vertexRecipes, verticiesInTopologicalOrder, recipes, extractors)
 
 if __name__ == "__main__":
-    product = "plastic-bar"
+    product = "electronic-circuit"
     amount = 1
     mode = "normal" 
     # mode = "expensive"
