@@ -68,7 +68,7 @@ def getVerticiesInTopologicalOrder(graph : list) -> list:
 def getUsedMachines(product : str, resultAmount : int, graph : list, vertexRecipes : list, verticiesInTopologicalOrder : list, recipes : dict, extractors : dict) -> dict:
     for result in recipes[vertexRecipes[0]["name"]]["results"]:
         if result["name"] == product:
-            vertexRecipes[0]["usesCount"] = math.ceil(resultAmount / result["amount"])
+            vertexRecipes[0]["usesCount"] = resultAmount / result["amount"]
 
     resources = {}
     for v in verticiesInTopologicalOrder:
@@ -92,7 +92,7 @@ def getUsedMachines(product : str, resultAmount : int, graph : list, vertexRecip
                     producedAmount = result["amount"]
                         
                     if resultName == ingredName:
-                        ingredRecipeCycles = math.ceil(max(0, (ingredAmount * recipeUsesCount - (producedAmount * ingredRecipeUsesCount - usedOutput[i])) / producedAmount))
+                        ingredRecipeCycles = max(0, (ingredAmount * recipeUsesCount - (producedAmount * ingredRecipeUsesCount - usedOutput[i])) / producedAmount)
                         vertexRecipes[u]["usesCount"] += ingredRecipeCycles
                         vertexRecipes[u]["resultsUsedAmount"][i] += ingredAmount * recipeUsesCount
 
