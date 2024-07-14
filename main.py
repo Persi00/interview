@@ -36,11 +36,11 @@ def generateGraphOfRecipes(product : str, recipes : dict, recipesThatMakeItem : 
                     usedRecipes[recipeName] = u
                     vertexsRecipe.append({"name": recipeName, "amountBeingUsed": 0, "resultsOfRecipieBeingUsed": [0] * len(recipes[recipeName]["results"])})
                     graph.append([])
+                    dfsStack.append(u)
                 else:
                     u = usedRecipes[recipeName]
 
                 graph[v].append(u)
-                dfsStack.append(u)
 
     return (graph, vertexsRecipe)
 
@@ -130,6 +130,9 @@ def getNeededMachines(product, productAmountPerSecond, mode = "normal"):
     extractors = readJsonFile("data/extractors.json")
 
     recipesThatMakeItem = getRecipiesThatMakeCertainItem(recipes)
+
+    if not product in recipesThatMakeItem:
+        raise ValueError("There is no recipe that makes such an item.") 
 
     graph, vertexsRecipe = generateGraphOfRecipes(product, recipes, recipesThatMakeItem)
 
