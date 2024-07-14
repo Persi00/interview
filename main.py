@@ -63,7 +63,7 @@ def getVerticiesInTopologicalOrder(graph : list) -> list:
 
     return verticiesInTopologicalOrder
 
-def getUsedMachines(product : str, productAmount : int, graph : list, vertexsRecipe : list, verticiesInTopologicalOrder : list, recipes : dict, extractors : dict) -> dict:
+def getUsedMachines(product : str, productAmount : float, graph : list, vertexsRecipe : list, verticiesInTopologicalOrder : list, recipes : dict, extractors : dict) -> dict:
     for result in recipes[vertexsRecipe[0]["name"]]["results"]:
         if result["name"] == product:
             vertexsRecipe[0]["amountBeingUsed"] = productAmount / result["amount"]
@@ -125,7 +125,7 @@ def getUsedMachines(product : str, productAmount : int, graph : list, vertexsRec
         
     return machines
 
-def getNeededMachines(product, productAmountPerSecond, mode = "normal"):
+def getNeededMachines(product : str, productAmountPerSecond : float, mode : str = "normal"):
     recipes = readJsonFile(f"data/{mode}.json")
     extractors = readJsonFile("data/extractors.json")
 
@@ -142,7 +142,7 @@ def getNeededMachines(product, productAmountPerSecond, mode = "normal"):
 
 if __name__ == "__main__":
     product = "plastic-bar"
-    amountPerSecond = 1
+    amountPerSecond = 1.0
     mode = "normal" 
     # mode = "expensive"
     machines = getNeededMachines(product, amountPerSecond, mode)
