@@ -1,6 +1,4 @@
-luaFile = open("recipe.lua", "r")
-
-# read lines and delete last and first line
+luaFile = open("data/recipe.lua", "r")
 luaFile.readline()
 linesLua = luaFile.readlines()
 linesLua.pop()
@@ -50,7 +48,6 @@ for i in range(len(tokens)):
 
 textJson = f'{"".join(tokens)}'.replace(',}', '}').replace(',]', ']')
 
-# dump data to json file
 jsonFile = open("data/recipe.json", "w+")
 jsonFile.writelines(textJson)
 jsonFile.close()

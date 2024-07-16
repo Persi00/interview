@@ -21,6 +21,9 @@ def extractRecipes(recipesJson : list, machines: dict, mode : str = "normal") ->
 
     for recipeJson in recipesJson:
         name = recipeJson["name"]
+        if name == "basic-oil-processing":
+            continue
+
         recipes[name] = {}
 
         category = "crafting"
@@ -28,7 +31,6 @@ def extractRecipes(recipesJson : list, machines: dict, mode : str = "normal") ->
             category = recipeJson["category"]
 
         recipes[name]["machine"] = machines[category]
-
 
         recipe = {}
         if mode in recipeJson:
@@ -62,6 +64,8 @@ def extractRecipes(recipesJson : list, machines: dict, mode : str = "normal") ->
                 else:
                     result = resultobj["name"]
                     amount = resultobj["amount"]
+                    if "probability" in resultobj:
+                        amount = resultobj["probability"]
 
                 recipes[name]["results"].append({"name": result, "amount": amount})
 
@@ -78,6 +82,7 @@ def prettyJson(mode):
     recipes = extractRecipes(jsonData, machines, mode)
     dumpJsonFile(f"data/{mode}.json", recipes)
 
-mode = "normal"
-# mode = "expensive"
-prettyJson(mode)
+if __name__ == "__main__":
+    mode = "normal"
+    # mode = "expensive"
+    prettyJson(mode)
