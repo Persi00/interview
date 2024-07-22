@@ -126,6 +126,9 @@ def getUsedMachines(product : str, productAmount : float, graph : list, vertexsR
     return machines
 
 def getNeededMachines(product : str, productAmountPerSecond : float, mode : str = "normal"):
+    if productAmountPerSecond < 0:
+        raise ValueError("You can't produce less than or equal to 0 things per second!")
+
     recipes = readJsonFile(f"data/{mode}.json")
     extractors = readJsonFile("data/extractors.json")
 

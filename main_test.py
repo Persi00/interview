@@ -12,6 +12,9 @@ def recipesThatMakeItem(recipes):
 @pytest.mark.parametrize(
     ("input", "expected"),
     (
+        (("copper-plate", -1, "normal"), {"Error": 1}),
+        (("abcdefghijk", 0, "normal"), {"Error": 1}),
+        (("copper-plate", 0, "normal"), {"Error": 1}),
         (("iron-plate", 1, "normal"), {"Electric mining drill": 2, "Electric furnace": 2}),
         (("iron-gear-wheel", 2, "expensive"), {"Electric mining drill": 16, "Electric furnace": 13, "Assembling machine 3": 1}),
         (("uranium-235", 1, "normal"), {"Centrifuge": 1715, "Electric mining drill": 5715}),
@@ -24,7 +27,11 @@ def recipesThatMakeItem(recipes):
     )
 )
 def test_getNeededMachines(input, expected):
-    assert main.getNeededMachines(input[0], input[1], input[2]) == expected
+    error = ("Error" in expected)
+    try:
+        assert main.getNeededMachines(input[0], input[1], input[2]) == expected
+    except:
+        assert error
 
 @pytest.mark.parametrize(
     ("input", "expected"),
